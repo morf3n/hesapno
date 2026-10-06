@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Kuyumcu Hızlı Tezgâh Satış & Hesap</title>
+  <style>
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: #f0f2f5; margin: 0; padding: 15px; color: #1c1e21; }
+    .container { max-width: 1100px; margin: auto; display: grid; grid-template-columns: 1fr 380px; gap: 20px; }
+    .card { background: #fff; border-radius: 10px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 15px; }
+    h2, h3 { margin-top: 0; margin-bottom: 12px; font-size: 17px; color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; }
+    .grid-rates { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .field { display: flex; flex-direction: column; gap: 4px; }
+    label { font-size: 12px; font-weight: 600; color: #475569; }
+    input, select { padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; font-weight: 600; }
+    input:focus, select:focus { outline: none; border-color: #2563eb; }
+    .grid-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; align-items: end; }
+    button.btn-add { background: #16a34a; color: white; border: none; padding: 9px 12px; border-radius: 6px; cursor: pointer; font-weight: 700; }
+    button.btn-add:hover { background: #15803d; }
+    
+    /* Sepet & Fiş Kısmı */
+    .cart-pane { position: sticky; top: 15px; height: fit-content; }
+    .cart-items { max-height: 420px; overflow-y: auto; margin-bottom: 15px; }
+    .cart-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed #cbd5e1; font-size: 13px; }
+    .cart-row button { background: #ef4444; color: #fff; border: none; border-radius: 4px; padding: 2px 6px; cursor: pointer; }
+    .total-box { background: #0f172a; color: #fff; padding: 15px; border-radius: 8px; text-align: center; }
+    .total-label { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; }
+    .total-price { font-size: 28px; font-weight: 800; color: #38bdf8; margin-top: 4px; }
+    .btn-clear { width: 100%; margin-top: 10px; background: #64748b; color: #fff; border: none; padding: 8px; border-radius: 6px; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- SOL TARAF: GİRİŞ PANELLERİ -->
+  <div>
+    <!-- 1. GÜNCEL EKRAN KURLARI -->
+    <div class="card">
+      <h2>1. Güncel Fiyat Girişleri (Ekrana Göre)</h2>
+      <div class="grid-rates">
+        <div class="field">
+          <label>Has Satış (₺)</label>
+          <input type="number" id="rateHas" value="6600">
+        </div>
+        <div class="field">
+          <label>Dolar Satış (₺)</label>
+          <input type="number" id="rateUsd" value="38.50" step="0.01">
+        </div>
+        <div class="field">
+          <label>Euro Satış (₺)</label>
+          <input type="number" id="rateEur" value="41.80" step="0.01">
+        </div>
+        <div class="field">
+          <label>Çeyrek Altın (₺)</label>
+          <input type="number" id="rateCeyrek" value="10800">
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. İŞÇİLİKLİ TAKI / BİLEZİK / GRAM SATIŞI -->
+    <div class="card">
+      <h2>2. Takı, Bilezik & Külçe Ekle</h2>
+      <div class="grid-inputs">
+        <div class="field">
+          <label>Ürün Türü</label>
+          <select id="takiTur">
+            <option value="24_kulce">24 Ayar Has / Külçe (0.995/1.00)</option>
+            <option value="22_zincir">22 Ayar Zincir/Kolye (0.976 + 1.2 iş)</option>
+            <option value="22_duz_bilezik">22 Ayar Düz/Burma Bilezik (0.930)</option>
+            <option value="14_zincir">14 Ayar Zincir (0.685 + 1.3 iş)</option>
+            <option value="14_yuzuk_kupe">14 Ayar Taşlı/Yüzük (0.685 + 1.8 iş)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Gram</label>
+          <input type="number" id="takiGram" placeholder="Örn: 20" step="0.01">
+        </div>
+        <button class="btn-add" onclick="addTaki()">+ Takıyı Ekle</button>
+      </div>
+    </div>
+
+    <!-- 3. ZİYNET / SARRAFİYE SATIŞI -->
+    <div class="card">
+      <h2>3. Ziynet Altın Ekle (Çeyrek, Yarım, Tam, Ata)</h2>
+      <div class="grid-inputs">
+        <div class="field">
+          <label>Ziynet Türü</label>
+          <select id="ziynetTur">
+            <option value="1">Çeyrek Altın</option>
+            <option value="2">Yarım Altın (2 Çeyrek)</option>
+            <option value="4">Tam Altın (4 Çeyrek)</option>
+            <option value="4.15">Ata Lira (Cumhuriyet)</option>
+            <option value="10">Gremse (10 Çeyrek)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Adet</label>
+          <input type="number" id="ziynetAdet" value="1" min="1">
+        </div>
+        <button class="btn-add" onclick="addZiynet()">+ Ziynet Ekle</button>
+      </div>
+    </div>
+
+    <!-- 4. DÖVİZ SATIŞI -->
+    <div class="card">
+      <h2>4. Döviz Ekle (Dolar / Euro)</h2>
+      <div class="grid-inputs">
+        <div class="field">
+          <label>Para Birimi</label>
+          <select id="dovizTur">
+            <option value="USD">Dolar ($)</option>
+            <option value="EUR">Euro (€)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Miktar</label>
+          <input type="number" id="dovizMiktar" placeholder="Örn: 50">
+        </div>
+        <button class="btn-add" onclick="addDoviz()">+ Döviz Ekle</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SAĞ TARAF: SEPET & GENEL TOPLAM -->
+  <div class="cart-pane">
+    <div class="card">
+      <h3>Müşteri Fişi / Sepet</h3>
+      <div class="cart-items" id="cartList">
+        <div style="color: #94a3b8; text-align: center; margin-top: 20px;">Henüz ürün eklenmedi.</div>
+      </div>
+
+      <div class="total-box">
+        <div class="total-label">ALINACAK TOPLAM TUTAR</div>
+        <div class="total-price" id="grandTotal">0 ₺</div>
+      </div>
+      <button class="btn-clear" onclick="clearCart()">Sepeti Temizle</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let cart = [];
+
+  function formatMoney(num) {
+    return Math.round(num).toLocaleString('tr-TR') + " ₺";
+  }
+
+  function addTaki() {
+    const gram = parseFloat(document.getElementById('takiGram').value);
+    const hasFiyat = parseFloat(document.getElementById('rateHas').value);
+    const tur = document.getElementById('takiTur').value;
+    if (!gram || gram <= 0) return alert("Lütfen gram girin!");
+
+    let tutar = 0;
+    let aciklama = "";
+
+    if (tur === "24_kulce") {
+      tutar = gram * hasFiyat;
+      aciklama = `${gram} gr 24 Ayar Has`;
+    } else if (tur === "22_zincir") {
+      tutar = ((gram * 0.976) + 1.2) * hasFiyat;
+      aciklama = `${gram} gr 22 Ayar Zincir`;
+    } else if (tur === "22_duz_bilezik") {
+      tutar = (gram * 0.930) * hasFiyat;
+      aciklama = `${gram} gr 22 Ayar Bilezik`;
+    } else if (tur === "14_zincir") {
+      tutar = ((gram * 0.685) + 1.3) * hasFiyat;
+      aciklama = `${gram} gr 14 Ayar Zincir`;
+    } else if (tur === "14_yuzuk_kupe") {
+      tutar = ((gram * 0.685) + 1.8) * hasFiyat;
+      aciklama = `${gram} gr 14 Ayar Taşlı/Küpe/Yüzük`;
+    }
+
+    cart.push({ name: aciklama, price: tutar });
+    document.getElementById('takiGram').value = '';
+    renderCart();
+  }
+
+  function addZiynet() {
+    const ceyrekFiyat = parseFloat(document.getElementById('rateCeyrek').value);
+    const turKatsayi = parseFloat(document.getElementById('ziynetTur').value);
+    const adet = parseInt(document.getElementById('ziynetAdet').value) || 1;
+    const turSelect = document.getElementById('ziynetTur');
+    const turIsim = turSelect.options[turSelect.selectedIndex].text;
+
+    const birimFiyat = ceyrekFiyat * turKatsayi;
+    const tutar = birimFiyat * adet;
+
+    cart.push({ name: `${adet} Adet ${turIsim}`, price: tutar });
+    renderCart();
+  }
+
+  function addDoviz() {
+    const tur = document.getElementById('dovizTur').value;
+    const miktar = parseFloat(document.getElementById('dovizMiktar').value);
+    const rateUsd = parseFloat(document.getElementById('rateUsd').value);
+    const rateEur = parseFloat(document.getElementById('rateEur').value);
+
+    if (!miktar || miktar <= 0) return alert("Lütfen miktar girin!");
+
+    const kur = tur === 'USD' ? rateUsd : rateEur;
+    const tutar = miktar * kur;
+
+    cart.push({ name: `${miktar} ${tur === 'USD' ? '$ Dolar' : '€ Euro'}`, price: tutar });
+    document.getElementById('dovizMiktar').value = '';
+    renderCart();
+  }
+
+  function removeItem(index) {
+    cart.splice(index, 1);
+    renderCart();
+  }
+
+  function clearCart() {
+    cart = [];
+    renderCart();
+  }
+
+  function renderCart() {
+    const listEl = document.getElementById('cartList');
+    if (cart.length === 0) {
+      listEl.innerHTML = `<div style="color: #94a3b8; text-align: center; margin-top: 20px;">Henüz ürün eklenmedi.</div>`;
+      document.getElementById('grandTotal').innerText = '0 ₺';
+      return;
+    }
+
+    let html = '';
+    let total = 0;
+    cart.forEach((item, index) => {
+      total += item.price;
+      html += `
+        <div class="cart-row">
+          <div>
+            <strong>${item.name}</strong><br>
+            <span style="color:#0284c7; font-weight:600;">${formatMoney(item.price)}</span>
+          </div>
+          <button onclick="removeItem(${index})">Sil</button>
+        </div>
+      `;
+    });
+
+    listEl.innerHTML = html;
+    document.getElementById('grandTotal').innerText = formatMoney(total);
+  }
+</script>
+
+</body>
+</html>
